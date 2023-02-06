@@ -13,12 +13,42 @@
 					'https://api.github.com/repos/SurroundingArt64/github-cdn-blogs/commits?path=blogs/blog-1.html'
 				)
 				const data = await response.json()
+
+				return data
 			}
 
 			const onLoad = async () => {
 				const response = await fetch('/blogs/blog-1.html')
 				const data = await response.text()
 				document.getElementById('markdown').innerHTML = data
+
+				const versions = await getVersions()
+				const versionsTag = document.getElementById('versions')
+				const versionExample =
+					document.getElementById('version-example')
+				for (const {} of versions) {
+					const newElement = versionExample.cloneNode(true)
+
+					versionExample.after(newElement)
+				}
+
+				versionsTag.removeChild(versionExample)
+
+				versionsTag.children
+				for (
+					let index = 0;
+					index < versionsTag.children.length;
+					index++
+				) {
+					const element = versionsTag.children[index]
+					element.children[0].innerHTML =
+						versions[index].commit.author.name
+
+					element.children[2].innerHTML = versions[index].sha.slice(
+						0,
+						7
+					)
+				}
 			}
 
 			document.addEventListener('DOMContentLoaded', onLoad)
@@ -26,11 +56,30 @@
 	</head>
 
 	<body>
-		<main class="flex justify-center w-[80%] py-20">
+		<div class="flex justify-center pt-20 pb-4">
 			<article
 				id="markdown"
-				class="prose prose-slate lg:prose-xl"
+				class="prose prose-slate lg:prose-xl w-[80%]"
 			></article>
-		</main>
+		</div>
+		<div class="flex justify-center py-2">
+			<div class="w-[80%]">
+				<h2>Versions</h2>
+				<div id="versions">
+					<p
+						id="version-example"
+						class="px-4 my-2 py-2 border-green-500 border-2 rounded-lg select-none cursor-pointer"
+					>
+						Version by:
+						<span id="author" class="author text-blue-400">SA</span>
+						<br />
+						Git Commit Id:
+						<span id="commit" class="commit text-blue-400"
+							>bb94f7c</span
+						>
+					</p>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

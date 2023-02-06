@@ -8,20 +8,17 @@
 		<link href="/dist/output.css" rel="stylesheet" />
 
 		<script>
+			const blogPath = `blogs/blog-1.html`
+			const url = `https://api.github.com/repos/SurroundingArt64/github-cdn-blogs`
+
 			const getVersions = async () => {
-				const response = await fetch(
-					'https://api.github.com/repos/SurroundingArt64/github-cdn-blogs/commits?path=blogs/blog-1.html'
-				)
+				const response = await fetch(`${url}/commits?path=${blogPath}`)
 				const data = await response.json()
 
 				return data
 			}
 
 			const onLoad = async () => {
-				const response = await fetch('/blogs/blog-1.html')
-				const data = await response.text()
-				document.getElementById('markdown').innerHTML = data
-
 				const versions = await getVersions()
 				const versionsTag = document.getElementById('versions')
 				const versionExample =
@@ -35,12 +32,40 @@
 				versionsTag.removeChild(versionExample)
 
 				versionsTag.children
+
+				let lastIndex = 0
+
+				const fetchOlderVersion = async (sha, index) => {
+					const response = await fetch(
+						`${url}/contents/${blogPath}?ref=${sha}`
+					)
+					const data = await response.json()
+					document.getElementById('markdown').innerHTML = atob(
+						data.content
+					)
+					versionsTag.children[lastIndex].classList.remove('border-4')
+					versionsTag.children[lastIndex].classList.add('border-2')
+
+					versionsTag.children[index].classList.remove('border-2')
+					versionsTag.children[index].classList.add('border-4')
+
+					lastIndex = index
+				}
+
 				for (
 					let index = 0;
 					index < versionsTag.children.length;
 					index++
 				) {
 					const element = versionsTag.children[index]
+
+					if (index === 0) {
+						fetchOlderVersion(versions[index].sha, index)
+					}
+
+					element.addEventListener('click', () => {
+						fetchOlderVersion(versions[index].sha, index)
+					})
 					element.children[0].innerHTML =
 						versions[index].commit.author.name
 
@@ -64,7 +89,7 @@
 		</div>
 		<div class="flex justify-center py-2">
 			<div class="prose prose-slate lg:prose-xl w-[80%]">
-				<h3>Versions</h2>
+				<h3>Versions</h3>
 				<div id="versions">
 					<p
 						id="version-example"
